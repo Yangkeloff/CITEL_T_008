@@ -1,24 +1,8 @@
-# client
-
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
+## 运行
 ```
 npm run serve
 ```
-
-### Compiles and minifies for production
+### mac下报错vue-cli-service: command not found
 ```
-npm run build
+sudo rm -rf node_modules package-lock.json && npm install
 ```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
