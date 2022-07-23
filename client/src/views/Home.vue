@@ -1,62 +1,42 @@
 <template>
   <div class="home">
     <el-row :gutter="20">
-      <el-col :span="6" :offset="0">
-        <span>出生年份</span>
-        <el-input
-          placeholder="开始年份"
-          v-model="submitData.yearStart"
-          type="number"
-          clearable>
-        </el-input>
-        <el-input
-          placeholder="结束年份"
-          v-model="submitData.yearEnd"
-          type="number"
-          clearable>
-        </el-input>
+      <el-col :span="7" :offset="0">
+        选择筛选类型
+        <el-select v-model="selectedType" placeholder="请选择">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
       </el-col>
-      <el-col :span="6" :offset="0">
-        <span>飞行里程</span>
+      <el-col :span="5" :offset="0">
         <el-input
-          placeholder="里程下限"
-          v-model="submitData.mileStart"
-          type="number"
-          clearable>
-        </el-input>
-        <el-input
-          placeholder="里程上限"
-          v-model="submitData.mileEnd"
-          type="number"
-          clearable>
-        </el-input>
-      </el-col>
-      <el-col :span="6" :offset="0">
-        <span>飞行时间</span>
-        <el-input
-          placeholder="时间下限"
-          v-model="submitData.hourStart"
-          type="number"
-          clearable>
-        </el-input>
-        <el-input
-          placeholder="时间上限"
-          v-model="submitData.hourEnd"
+          placeholder="起始值"
+          v-model="submitData.start"
           type="number"
           clearable>
         </el-input>
       </el-col>
       <el-col :span="5" :offset="0">
-        <el-row :gutter="20" style="margin-top:10px;">
-          <el-button type="primary" @click="submit">
-            查询
-          </el-button>
-        </el-row>
-        <el-row :gutter="20" style="margin-top:5px;">
-          <el-button type="warning" plain @click="clear">
-            清空
-          </el-button>
-        </el-row>
+        <el-input
+          placeholder="结束值"
+          v-model="submitData.end"
+          type="number"
+          clearable>
+        </el-input>
+      </el-col>
+      <el-col :span="2" :offset="0">
+        <el-button type="primary" @click="submit">
+          查询
+        </el-button>
+      </el-col>
+      <el-col :span="2" :offset="0">
+        <el-button type="warning" plain @click="clear">
+          清空
+        </el-button>
       </el-col>
     </el-row>
     <el-table
@@ -90,13 +70,23 @@ export default {
   },
   data() {
     return {
+      selectedType: null,
+      options: [
+        {
+          label: '出生年份',
+          value: 1
+        },{
+          label: '飞行里程',
+          value: 2
+        },{
+          label: '飞行时间',
+          value: 3
+        },
+      ],
       submitData: {
-        yearStart: null,
-        yearEnd: null,
-        mileStart: null,
-        mileEnd: null,
-        hourStart: null,
-        hourEnd: null
+        type: null,
+        start: null,
+        end: null
       },
       tableData: [{
         date: '2016-05-03',

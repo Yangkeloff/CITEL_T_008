@@ -26,8 +26,16 @@ public class PersonService {
         return personMapper.delete(id);
     }
 
-    public List<Person> findPersonList() {
-        return personMapper.findAllPerson();
+    public List<Person> findPersonByBirth(int start, int end) {
+        return personMapper.findPersonByBirth(start, end);
+    }
+
+    public List<Person> findPersonByMile(int start, int end) {
+        return personMapper.findPersonByMile(start, end);
+    }
+
+    public List<Person> findPersonByHour(int start, int end) {
+        return personMapper.findPersonByHour(start, end);
     }
 
     public Person findPerson(int id) {

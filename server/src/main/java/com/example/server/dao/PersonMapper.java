@@ -23,6 +23,15 @@ public interface PersonMapper {
     @Delete("delete from person where id = #{id}")
     int delete(int id);
 
-    @Select("select * from person")
-    List<Person> findAllPerson();
+    @Select("select * from person where birth BETWEEN #{start} AND #{end}")
+    List<Person> findPersonByBirth(@Param("start") Integer start,
+                                   @Param("end") Integer end);
+
+    @Select("select * from person where mileage BETWEEN #{start} AND #{end}")
+    List<Person> findPersonByMile(@Param("start") Integer start,
+                                  @Param("end") Integer end);
+
+    @Select("select * from person where hour BETWEEN #{start} AND #{end}")
+    List<Person> findPersonByHour(@Param("start") Integer start,
+                                  @Param("end") Integer end);
 }

@@ -13,9 +13,22 @@ public class PersonController {
     @Autowired
     PersonService personService;
 
-    @RequestMapping(value = "/list", method = RequestMethod.GET)
-    public List<Person> getPersonList(){
-        return personService.findPersonList();
+    @RequestMapping(value = "/list/birth", method = RequestMethod.GET)
+    public List<Person> findPersonByBirth(@RequestParam(value = "start") int start,
+                                          @RequestParam(value = "end") int end){
+        return personService.findPersonByBirth(start, end);
+    }
+
+    @RequestMapping(value = "/list/mile", method = RequestMethod.GET)
+    public List<Person> findPersonByMile(@RequestParam(value = "start") int start,
+                                         @RequestParam(value = "end") int end){
+        return personService.findPersonByMile(start, end);
+    }
+
+    @RequestMapping(value = "/list/hour", method = RequestMethod.GET)
+    public List<Person> findPersonByHour(@RequestParam(value = "start") int start,
+                                         @RequestParam(value = "end") int end){
+        return personService.findPersonByHour(start, end);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
