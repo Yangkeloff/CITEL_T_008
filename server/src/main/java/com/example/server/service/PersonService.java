@@ -37,7 +37,9 @@ public class PersonService {
     public List<Person> findPersonByHour(int start, int end) {
         return personMapper.findPersonByHour(start, end);
     }
-
+    public List<Person> findAllPerson(int start, int pageSize) {
+        return personMapper.findAllPerson(start, pageSize);
+    }
     public Person findPerson(int id) {
         return personMapper.findPerson(id);
     }

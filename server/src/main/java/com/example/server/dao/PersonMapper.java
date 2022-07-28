@@ -15,6 +15,8 @@ public interface PersonMapper {
 
     @Select("select * from person where id = #{id}")
     Person findPerson(@Param("id") int id);
+    @Select("select * from person limit #{start},#{pageSize}")
+    List<Person> findAllPerson(@Param("start") Integer start, @Param("pageSize") Integer pageSize);
     @Update("update person set gender = #{gender}, birth = #{birth}, mileage = #{mileage}, hour = #{hour} where id = #{id}")
     int update(@Param("id") Integer id, @Param("gender") Integer gender,
             @Param("birth") Integer birth, @Param("mileage") Integer mileage,

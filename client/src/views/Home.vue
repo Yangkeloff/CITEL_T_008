@@ -12,7 +12,7 @@
           </el-option>
         </el-select>
       </el-col>
-      <el-col :span="5" :offset="0">
+      <el-col :span="5" v-if="selectedType !== 0">
         <el-input
           placeholder="起始值"
           v-model="submitData.start"
@@ -20,7 +20,7 @@
           clearable>
         </el-input>
       </el-col>
-      <el-col :span="5" :offset="0">
+      <el-col :span="5" v-if="selectedType !== 0">
         <el-input
           placeholder="结束值"
           v-model="submitData.end"
@@ -29,49 +29,75 @@
         </el-input>
       </el-col>
       <el-col :span="2" :offset="0">
-        <el-button type="primary" @click="submit">
+        <el-button type="primary" @click="getList">
           查询
         </el-button>
       </el-col>
-      <el-col :span="2" :offset="0">
+      <el-col :span="2" v-if="selectedType !== 0">
         <el-button type="warning" plain @click="clear">
           清空
         </el-button>
       </el-col>
+      <el-col :span="2" :offset="1">
+        <el-button type="success" @click="add">
+          新增
+        </el-button>
+      </el-col>
     </el-row>
-    <el-table
-      :data="tableData"
-      height="250"
-      border
-      style="width: 100%; margin-top: 20px;">
+    <el-table :data="tableData" border style="width: 100%; margin-top: 20px;">
       <el-table-column
-        prop="date"
-        label="日期"
+        prop="id"
+        label="人员ID"
         width="180">
       </el-table-column>
       <el-table-column
-        prop="name"
-        label="姓名"
+        prop="gender"
+        label="性别"
         width="180">
       </el-table-column>
       <el-table-column
-        prop="address"
-        label="地址">
+        prop="birth"
+        label="出生年份"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="mileage"
+        label="旅行里程"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="hour"
+        label="旅行时间"
+        width="180">
       </el-table-column>
     </el-table>
+    <el-pagination
+      @current-change="getList"
+      :current-page.sync="curPage"
+      :page-size="pageSize"
+      layout="prev, pager, next, jumper"
+      :total="total">
+    </el-pagination>
   </div>
 </template>
 
 <script>
-
+import api from '@/api/axios'
 export default {
   name: 'HomeView',
   components: {
   },
   data() {
     return {
-      selectedType: null,
+      pageSize: 20,
+      curPage: 1,
+      total: 0,
+      selectedType: 0,
       options: [
+        {
+          label: '全部',
+          value: 0
+        },
         {
           label: '出生年份',
           value: 1
@@ -84,7 +110,6 @@ export default {
         },
       ],
       submitData: {
-        type: null,
         start: null,
         end: null
       },
@@ -119,12 +144,27 @@ export default {
       }]
     }
   },
+  mounted() {
+    this.getList()
+  },
   methods:{
-    submit() {
+    add() {
 
     },
     clear() {
 
+    },
+    async getList() {
+      let res
+      switch(this.selectedType) {
+        case 0:
+          res = await api.findAllPerson(this.pageSize, this.curPage)
+          console.log(res)
+          this.tableData = res.data
+          break
+        default:
+          break
+      }
     }
   }
 }

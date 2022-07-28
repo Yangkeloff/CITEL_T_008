@@ -12,7 +12,12 @@ import java.util.List;
 public class PersonController {
     @Autowired
     PersonService personService;
-
+    @RequestMapping(value = "/list/all", method = RequestMethod.GET)
+    public List<Person> findAllPerson(@RequestParam(value = "pageSize") int pageSize,
+                                      @RequestParam(value = "curPage") int curPage){
+        int start = pageSize * (curPage - 1);
+        return personService.findAllPerson(start, pageSize);
+    }
     @RequestMapping(value = "/list/birth", method = RequestMethod.GET)
     public List<Person> findPersonByBirth(@RequestParam(value = "start") int start,
                                           @RequestParam(value = "end") int end){
