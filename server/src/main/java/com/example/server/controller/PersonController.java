@@ -1,5 +1,6 @@
 package com.example.server.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.example.server.entity.Person;
 import com.example.server.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,17 +47,19 @@ public class PersonController {
         return personService.selectTotal(typeStr, start, end);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getPerson/{id}", method = RequestMethod.GET)
     public Person getPerson(@PathVariable("id") int id){
-        return personService.findPerson(id);
+        return personService.getPerson(id);
     }
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public String addPerson(@RequestParam(value = "id") int id,
-                            @RequestParam(value = "gender") int gender,
-                            @RequestParam(value = "birth") int birth,
-                            @RequestParam(value = "mileage") int mileage,
-                            @RequestParam(value = "hour") int hour) {
+    public String addPerson(@RequestBody String jsonString) {
+        JSONObject personObj = JSONObject.parseObject(jsonString);
+        int id = personObj.getIntValue("id");
+        int gender = personObj.getIntValue("gender");
+        int birth = personObj.getIntValue("birth");
+        int mileage = personObj.getIntValue("mileage");
+        int hour = personObj.getIntValue("hour");
         int t = personService.add(id, gender, birth, mileage, hour);
         if (t == 1) {
             return "success";

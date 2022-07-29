@@ -11,8 +11,10 @@ axios.interceptors.request.use = instance.interceptors.request.use
 
 
 export default {
+  getPerson(id) {
+    return instance.get(`/api/person/getPerson/${id}`)
+  },
   findAllPerson(data){
-    console.log(data)
     let {type, start, end, curPage, pageSize} = data
     if(start==null || end==null) {
       start = 0

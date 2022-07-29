@@ -32,7 +32,7 @@ public class PersonService {
     public Integer selectTotal(String type, int start, int end){
         return personMapper.selectTotal(type, start, end);
     }
-    public Person findPerson(int id) {
-        return personMapper.findPerson(id);
+    public Person getPerson(int id) {
+        return personMapper.getPerson(id);
     }
 }

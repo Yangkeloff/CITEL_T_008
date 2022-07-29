@@ -33,12 +33,7 @@
           查询
         </el-button>
       </el-col>
-      <el-col :span="2" v-if="selectedType !== 0">
-        <el-button type="warning" plain @click="clear">
-          清空
-        </el-button>
-      </el-col>
-      <el-col :span="2" :offset="1">
+      <el-col :span="2" :offset="3">
         <el-button type="success" @click="add">
           新增
         </el-button>
@@ -68,6 +63,18 @@
         prop="hour"
         label="旅行时间">
       </el-table-column>
+      <el-table-column label="操作" width="200">
+        <template slot-scope="scope">
+          <el-button
+            size="mini"
+            type="warning"
+            @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          <el-button
+            size="mini"
+            type="danger"
+            @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <el-pagination
       @current-change="getList"
@@ -76,6 +83,32 @@
       layout="prev, pager, next, jumper"
       :total="total">
     </el-pagination>
+    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible">
+      <el-form :model="form">
+        <el-form-item label="人员ID" label-width="120px">
+          <el-input v-model="form.id" type="number" :disabled="dialogType!=2"></el-input>
+        </el-form-item>
+        <el-form-item label="性别" label-width="120px">
+          <el-select style="width:100%"  v-model="form.gender" placeholder="请选择性别">
+            <el-option label="女" value="0"></el-option>
+            <el-option label="男" value="1"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="出生年份" label-width="120px">
+          <el-input v-model="form.birth" type="number"></el-input>
+        </el-form-item>
+        <el-form-item label="总旅行里程" label-width="120px">
+          <el-input v-model="form.mileage" type="number"></el-input>
+        </el-form-item>
+        <el-form-item label="总旅行时间" label-width="120px">
+          <el-input v-model="form.hour" type="number"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="formSubmit">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -91,6 +124,13 @@ export default {
       curPage: 1,
       total: 0,
       selectedType: 0,
+      form: {
+        id: null,
+        gender: null,
+        birth: null,
+        mileage: null,
+        hour: null
+      },
       options: [
         {
           label: '全部',
@@ -107,54 +147,79 @@ export default {
           value: 3
         },
       ],
+      dialogType: 0,  // 0查看, 1编辑, 2新增
+      dialogVisible: false,
+      dialogTitle: '',
       submitData: {
         start: null,
         end: null
       },
-      tableData: [{
-        date: '2016-05-03',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-02',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-04',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-01',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-08',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-06',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-07',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }]
+      tableData: []
     }
   },
   mounted() {
     this.getList()
+  },
+  watch: {
+    selectedType(newVal) {
+      if(newVal == 0) {
+        this.submitData.start = null
+        this.submitData.end = null
+      }
+    }
   },
   methods:{
     genderFormatter(row) {
       const { gender } = row
       return gender == 0 ? '女' : '男'
     },
-    add() {
-
+    async formSubmit() {
+      let i, res
+      for (i in this.form) {
+        this.form[i] = parseInt(this.form[i])
+      }
+      console.log(this.form)
+      switch (this.dialogType) {
+        case 1:
+          res = await api.updatePerson(this.form)
+          break
+        case 2:
+          res = await api.addPerson(this.form)
+          if(res=='success') {
+            this.dialogVisible = false
+            this.getList()
+          }
+          break;
+        default:
+          break;
+      }
+      console.log(res)
     },
-    clear() {
-
+    add() {
+      const empty = {
+        id: null,
+        gender: null,
+        birth: null,
+        mileage: null,
+        hour: null
+      }
+      this.form = empty
+      this.dialogType = 2
+      this.dialogTitle = '新增人员'
+      this.dialogVisible = true
+    },
+    async queryPerson(id) {
+      let res = await api.getPerson(id)
+      this.form = res.data
+    },
+    handleEdit(index, row) {
+      this.queryPerson(row.id)
+      this.dialogType = 1
+      this.dialogTitle = '编辑人员'
+      this.dialogVisible = true
+    },
+    handleDelete(index, row) {
+      console.log(index, row);
     },
     async getList() {
       const params = {

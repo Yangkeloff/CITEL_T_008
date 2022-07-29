@@ -14,13 +14,24 @@ public interface PersonMapper {
             @Param("hour") Integer hour);
 
     @Select("select * from person where id = #{id}")
-    Person findPerson(@Param("id") int id);
-    @Select("select count(*) from person where #{type} BETWEEN #{start} AND #{end}")
+    Person getPerson(@Param("id") int id);
+    @Select({"<script>" +
+            "select count(*) from person " +
+            "<if test='type.length()>0'>" +
+            "where ${type} BETWEEN #{start} and #{end} " +
+            "</if>" +
+            "</script>"})
     Integer selectTotal(
             @Param("type") String type,
             @Param("start") Integer start,
             @Param("end") Integer end);
-    @Select("select * from person where #{type} BETWEEN #{start} and #{end} limit #{from},#{pageSize}")
+    @Select({"<script>" +
+            "select * from person " +
+            "<if test='type.length()>0'>" +
+            "where ${type} BETWEEN #{start} and #{end} " +
+            "</if>" +
+            "limit #{from},#{pageSize}" +
+            "</script>"})
     List<Person> findAllPerson(
             @Param("type") String type,
             @Param("start") Integer start,
