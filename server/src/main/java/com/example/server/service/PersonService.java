@@ -26,19 +26,11 @@ public class PersonService {
         return personMapper.delete(id);
     }
 
-    public List<Person> findPersonByBirth(int start, int end) {
-        return personMapper.findPersonByBirth(start, end);
+    public List<Person> findAllPerson(String type, int start, int end, int from, int pageSize) {
+        return personMapper.findAllPerson(type, start, end, from, pageSize);
     }
-
-    public List<Person> findPersonByMile(int start, int end) {
-        return personMapper.findPersonByMile(start, end);
-    }
-
-    public List<Person> findPersonByHour(int start, int end) {
-        return personMapper.findPersonByHour(start, end);
-    }
-    public List<Person> findAllPerson(int start, int pageSize) {
-        return personMapper.findAllPerson(start, pageSize);
+    public Integer selectTotal(String type, int start, int end){
+        return personMapper.selectTotal(type, start, end);
     }
     public Person findPerson(int id) {
         return personMapper.findPerson(id);

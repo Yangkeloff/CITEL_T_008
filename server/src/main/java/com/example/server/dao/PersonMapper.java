@@ -15,8 +15,18 @@ public interface PersonMapper {
 
     @Select("select * from person where id = #{id}")
     Person findPerson(@Param("id") int id);
-    @Select("select * from person limit #{start},#{pageSize}")
-    List<Person> findAllPerson(@Param("start") Integer start, @Param("pageSize") Integer pageSize);
+    @Select("select count(*) from person where #{type} BETWEEN #{start} AND #{end}")
+    Integer selectTotal(
+            @Param("type") String type,
+            @Param("start") Integer start,
+            @Param("end") Integer end);
+    @Select("select * from person where #{type} BETWEEN #{start} and #{end} limit #{from},#{pageSize}")
+    List<Person> findAllPerson(
+            @Param("type") String type,
+            @Param("start") Integer start,
+            @Param("end") Integer end,
+            @Param("from") Integer from,
+            @Param("pageSize") Integer pageSize);
     @Update("update person set gender = #{gender}, birth = #{birth}, mileage = #{mileage}, hour = #{hour} where id = #{id}")
     int update(@Param("id") Integer id, @Param("gender") Integer gender,
             @Param("birth") Integer birth, @Param("mileage") Integer mileage,
@@ -24,16 +34,4 @@ public interface PersonMapper {
 
     @Delete("delete from person where id = #{id}")
     int delete(int id);
-
-    @Select("select * from person where birth BETWEEN #{start} AND #{end}")
-    List<Person> findPersonByBirth(@Param("start") Integer start,
-                                   @Param("end") Integer end);
-
-    @Select("select * from person where mileage BETWEEN #{start} AND #{end}")
-    List<Person> findPersonByMile(@Param("start") Integer start,
-                                  @Param("end") Integer end);
-
-    @Select("select * from person where hour BETWEEN #{start} AND #{end}")
-    List<Person> findPersonByHour(@Param("start") Integer start,
-                                  @Param("end") Integer end);
 }

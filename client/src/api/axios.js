@@ -11,8 +11,26 @@ axios.interceptors.request.use = instance.interceptors.request.use
 
 
 export default {
-  findAllPerson(pageSize, curPage){
-    return instance.get(`/api/person/list/all?pageSize=${pageSize}&curPage=${curPage}`)
+  findAllPerson(data){
+    console.log(data)
+    let {type, start, end, curPage, pageSize} = data
+    if(start==null || end==null) {
+      start = 0
+      end = 99999999
+    }
+    start = parseInt(start)
+    end = parseInt(end)
+    return instance.get(`/api/person/list/all?type=${type}&start=${start}&end=${end}&curPage=${curPage}&pageSize=${pageSize}`)
+  },
+  selectTotal(data) {
+    let {type, start, end} = data
+    if(start==null || end==null) {
+      start = 0
+      end = 99999999
+    }
+    start = parseInt(start)
+    end = parseInt(end)
+    return instance.get(`/api/person/list/total?type=${type}&start=${start}&end=${end}`)
   },
   addPerson(data){
     return instance.post(`/api/person/add`, data)
@@ -24,17 +42,5 @@ export default {
   delPerson(data){
     let {id} = data
     return instance.delete(`/api/person/del?id=${id}`)
-  },
-  findPersonByBirth(data){
-    let {start, end} = data
-    return instance.get(`/api/person/list/birth?start=${start}&end=${end}`)
-  },
-  findPersonByMile(data){
-    let {start, end} = data
-    return instance.get(`/api/person/list/mile?start=${start}&end=${end}`)
-  },
-  findPersonByHour(data){
-    let {start, end} = data
-    return instance.get(`/api/person/list/hour?start=${start}&end=${end}`)
   }
 }

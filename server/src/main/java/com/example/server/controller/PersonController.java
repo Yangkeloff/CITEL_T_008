@@ -13,27 +13,37 @@ public class PersonController {
     @Autowired
     PersonService personService;
     @RequestMapping(value = "/list/all", method = RequestMethod.GET)
-    public List<Person> findAllPerson(@RequestParam(value = "pageSize") int pageSize,
-                                      @RequestParam(value = "curPage") int curPage){
-        int start = pageSize * (curPage - 1);
-        return personService.findAllPerson(start, pageSize);
+    public List<Person> findAllPerson(
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "start") int start,
+            @RequestParam(value = "end") int end,
+            @RequestParam(value = "curPage") int curPage,
+            @RequestParam(value = "pageSize") int pageSize){
+        String typeStr = "";
+        if (type == 1) {
+            typeStr = "birth";
+        }else if (type == 2) {
+            typeStr = "mileage";
+        }else if (type == 3) {
+            typeStr = "hour";
+        }
+        int from = pageSize * (curPage - 1);
+        return personService.findAllPerson(typeStr, start, end, from, pageSize);
     }
-    @RequestMapping(value = "/list/birth", method = RequestMethod.GET)
-    public List<Person> findPersonByBirth(@RequestParam(value = "start") int start,
-                                          @RequestParam(value = "end") int end){
-        return personService.findPersonByBirth(start, end);
-    }
-
-    @RequestMapping(value = "/list/mile", method = RequestMethod.GET)
-    public List<Person> findPersonByMile(@RequestParam(value = "start") int start,
-                                         @RequestParam(value = "end") int end){
-        return personService.findPersonByMile(start, end);
-    }
-
-    @RequestMapping(value = "/list/hour", method = RequestMethod.GET)
-    public List<Person> findPersonByHour(@RequestParam(value = "start") int start,
-                                         @RequestParam(value = "end") int end){
-        return personService.findPersonByHour(start, end);
+    @RequestMapping(value = "/list/total", method = RequestMethod.GET)
+    public Integer selectTotal(
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "start") int start,
+            @RequestParam(value = "end") int end){
+        String typeStr = "";
+        if (type == 1) {
+            typeStr = "birth";
+        }else if (type == 2) {
+            typeStr = "mileage";
+        }else if (type == 3) {
+            typeStr = "hour";
+        }
+        return personService.selectTotal(typeStr, start, end);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)

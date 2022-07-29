@@ -47,12 +47,12 @@
     <el-table :data="tableData" border style="width: 100%; margin-top: 20px;">
       <el-table-column
         prop="id"
-        label="人员ID"
-        width="180">
+        label="人员ID">
       </el-table-column>
       <el-table-column
         prop="gender"
         label="性别"
+        :formatter="genderFormatter"
         width="180">
       </el-table-column>
       <el-table-column
@@ -62,13 +62,11 @@
       </el-table-column>
       <el-table-column
         prop="mileage"
-        label="旅行里程"
-        width="180">
+        label="旅行里程">
       </el-table-column>
       <el-table-column
         prop="hour"
-        label="旅行时间"
-        width="180">
+        label="旅行时间">
       </el-table-column>
     </el-table>
     <el-pagination
@@ -148,6 +146,10 @@ export default {
     this.getList()
   },
   methods:{
+    genderFormatter(row) {
+      const { gender } = row
+      return gender == 0 ? '女' : '男'
+    },
     add() {
 
     },
@@ -155,16 +157,18 @@ export default {
 
     },
     async getList() {
-      let res
-      switch(this.selectedType) {
-        case 0:
-          res = await api.findAllPerson(this.pageSize, this.curPage)
-          console.log(res)
-          this.tableData = res.data
-          break
-        default:
-          break
+      const params = {
+        type: this.selectedType,
+        start: this.submitData.start,
+        end: this.submitData.end,
+        curPage: this.curPage,
+        pageSize: this.pageSize
       }
+      let listRes, totalRes
+      listRes = await api.findAllPerson(params)
+      totalRes = await api.selectTotal(params)
+      this.tableData = listRes.data
+      this.total = totalRes.data
     }
   }
 }
