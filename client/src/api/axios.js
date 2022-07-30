@@ -41,8 +41,7 @@ export default {
     let {id, gender, birth, mileage, hour} = data
     return instance.put(`/api/person/update?id=${id}&gender=${gender}&birth=${birth}&mileage=${mileage}&hour=${hour}`)
   },
-  delPerson(data){
-    let {id} = data
+  delPerson(id){
     return instance.delete(`/api/person/del?id=${id}`)
   }
 }

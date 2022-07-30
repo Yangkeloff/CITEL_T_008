@@ -90,8 +90,8 @@
         </el-form-item>
         <el-form-item label="性别" label-width="120px">
           <el-select style="width:100%"  v-model="form.gender" placeholder="请选择性别">
-            <el-option label="女" value="0"></el-option>
-            <el-option label="男" value="1"></el-option>
+            <el-option label="女" :value="0"></el-option>
+            <el-option label="男" :value="1"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="出生年份" label-width="120px">
@@ -178,22 +178,32 @@ export default {
       for (i in this.form) {
         this.form[i] = parseInt(this.form[i])
       }
-      console.log(this.form)
       switch (this.dialogType) {
         case 1:
           res = await api.updatePerson(this.form)
           break
         case 2:
           res = await api.addPerson(this.form)
-          if(res=='success') {
-            this.dialogVisible = false
-            this.getList()
-          }
           break;
         default:
           break;
       }
-      console.log(res)
+      if(res.data=='success') {
+        let type
+        if(this.dialogType == 1){
+          type = '编辑'
+        } else if (this.dialogType == 2) {
+          type = '新增'
+        }
+        this.$message({
+          message: `${type}成功`,
+          type: 'success'
+        })
+        this.dialogVisible = false
+        this.getList()
+      } else {
+        this.$message.error(`错误：${res.data}`)
+      }
     },
     add() {
       const empty = {
@@ -218,8 +228,17 @@ export default {
       this.dialogTitle = '编辑人员'
       this.dialogVisible = true
     },
-    handleDelete(index, row) {
-      console.log(index, row);
+    async handleDelete(index, row) {
+      const res = await api.delPerson(row.id)
+      if(res.data=='success') {
+        this.$message({
+          message: '删除成功',
+          type: 'warning'
+        })
+        this.getList()
+      } else {
+        this.$message.error(`错误：${res.data}`)
+      }
     },
     async getList() {
       const params = {
