@@ -29,7 +29,7 @@
         </el-input>
       </el-col>
       <el-col :span="2" :offset="0">
-        <el-button type="primary" @click="getList">
+        <el-button type="primary" @click="queryList">
           查询
         </el-button>
       </el-col>
@@ -39,50 +39,55 @@
         </el-button>
       </el-col>
     </el-row>
-    <el-table :data="tableData" border style="width: 100%; margin-top: 20px;">
-      <el-table-column
-        prop="id"
-        label="人员ID">
-      </el-table-column>
-      <el-table-column
-        prop="gender"
-        label="性别"
-        :formatter="genderFormatter"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        prop="birth"
-        label="出生年份"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        prop="mileage"
-        label="旅行里程">
-      </el-table-column>
-      <el-table-column
-        prop="hour"
-        label="旅行时间">
-      </el-table-column>
-      <el-table-column label="操作" width="200">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="warning"
-            @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <el-pagination
-      @current-change="getList"
-      :current-page.sync="curPage"
-      :page-size="pageSize"
-      layout="prev, pager, next, jumper"
-      :total="total">
-    </el-pagination>
+    <el-tabs v-model="activeTab" type="border-card" @tab-click="tabClick" style="margin-top: 20px;">
+      <el-tab-pane v-for="(item, index) in sections" :key="index" 
+      :label="item" :name="index.toString()">
+        <el-table :data="tableData" border style="width: 100%; margin-top: 20px;">
+        <el-table-column
+          prop="id"
+          label="人员ID">
+        </el-table-column>
+        <el-table-column
+          prop="gender"
+          label="性别"
+          :formatter="genderFormatter"
+          width="180">
+        </el-table-column>
+        <el-table-column
+          prop="birth"
+          label="出生年份"
+          width="180">
+        </el-table-column>
+        <el-table-column
+          prop="mileage"
+          label="旅行里程">
+        </el-table-column>
+        <el-table-column
+          prop="hour"
+          label="旅行时间">
+        </el-table-column>
+        <el-table-column label="操作" width="200">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              type="warning"
+              @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        @current-change="getList"
+        :current-page.sync="curPage"
+        :page-size="pageSize"
+        layout="prev, pager, next, jumper"
+        :total="total">
+      </el-pagination>
+      </el-tab-pane>
+    </el-tabs>
     <el-dialog :title="dialogTitle" :visible.sync="dialogVisible">
       <el-form :model="form">
         <el-form-item label="人员ID" label-width="120px">
@@ -120,10 +125,15 @@ export default {
   },
   data() {
     return {
+      activeTab: '',
+      sections: ['全部'],
       pageSize: 20,
       curPage: 1,
       total: 0,
       selectedType: 0,
+      queryType: 0,
+      queryStart: null,
+      queryEnd: null,
       form: {
         id: null,
         gender: null,
@@ -165,6 +175,7 @@ export default {
       if(newVal == 0) {
         this.submitData.start = null
         this.submitData.end = null
+        this.sections = ['全部']
       }
     }
   },
@@ -200,7 +211,8 @@ export default {
           type: 'success'
         })
         this.dialogVisible = false
-        this.getList()
+        this.selectedType = 0
+        this.queryList()
       } else {
         this.$message.error(`错误：${res.data}`)
       }
@@ -235,16 +247,105 @@ export default {
           message: '删除成功',
           type: 'warning'
         })
-        this.getList()
+        this.selectedType = 0
+        this.queryList()
       } else {
         this.$message.error(`错误：${res.data}`)
       }
     },
+    queryList(){
+      const range = parseInt(this.submitData.end) - parseInt(this.submitData.start)
+      if(range <= 0) {
+        this.$message.error(`查询范围有误，结束值：${this.submitData.end}小于起始值：${this.submitData.start}`)
+        return
+      }
+      this.queryType = this.selectedType
+      this.activeTab = '0'
+      switch(this.queryType){
+        case 0:
+          this.sections = ['全部']
+          this.queryStart = null
+          this.queryEnd = null
+          this.getList()
+          break
+        case 1:
+          this.sepBirth()
+          this.queryStart = this.submitData.start
+          this.queryEnd = this.submitData.start
+          this.getList()
+          break
+        case 2:
+          this.sepRange(1000)
+          if(range >= 1000) {
+            this.queryStart = parseInt(this.submitData.start)
+            this.queryEnd = parseInt(this.submitData.start) + 1000
+          } else {
+            this.queryStart = parseInt(this.submitData.start)
+            this.queryEnd = parseInt(this.submitData.end)
+          }
+          this.getList()
+          break
+        case 3:
+          this.sepRange(50)
+          if(range >= 50) {
+            this.queryStart = parseInt(this.submitData.start)
+            this.queryEnd = parseInt(this.submitData.start) + 50
+          } else {
+            this.queryStart = parseInt(this.submitData.start)
+            this.queryEnd = parseInt(this.submitData.end)
+          }
+          this.getList()
+          break
+      }
+    },
+    tabClick(e) {
+      const val = e.label
+      this.curPage = 1
+      let pos
+      switch(this.queryType){
+        case 0:
+          break
+        case 1:
+          this.queryStart = val
+          this.queryEnd = val
+          this.getList()
+          break
+        default:
+          pos = val.indexOf('~')
+          this.queryStart = parseInt(val.substring(0, pos))
+          this.queryEnd = parseInt(val.substring(pos+1))
+          this.getList()
+          break
+      }
+    },
+    sepBirth() {
+      this.sections = []
+      for(let i = this.submitData.start; i <= this.submitData.end; i++) {
+        this.sections.push(i.toString())
+      }
+    },
+    sepRange(span) {
+      this.sections = []
+      const range = parseInt(this.submitData.end) - parseInt(this.submitData.start)
+      if(range < span) {
+        this.sections.push(`${this.submitData.start}~${this.submitData.end}`)
+      } else {
+        const num = parseInt(range / span)
+        let temp = parseInt(this.submitData.start)
+        for(let i = 0; i < num; i++) {
+          this.sections.push(`${temp}~${temp+span}`)
+          temp += span
+        }
+        if(range % span != 0) {
+          this.sections.push(`${temp}~${this.submitData.end}`)
+        }
+      }
+    },
     async getList() {
       const params = {
-        type: this.selectedType,
-        start: this.submitData.start,
-        end: this.submitData.end,
+        type: this.queryType,
+        start: this.queryStart,
+        end: this.queryEnd,
         curPage: this.curPage,
         pageSize: this.pageSize
       }
