@@ -11,6 +11,10 @@ axios.interceptors.request.use = instance.interceptors.request.use
 
 
 export default {
+  getNums(data) {
+    let { type, start, end } = data
+    return instance.get(`/api/person/nums?type=${type}&start=${start}&end=${end}`)
+  },
   getPerson(id) {
     return instance.get(`/api/person/getPerson/${id}`)
   },

@@ -1,5 +1,8 @@
 <template>
   <div class="home">
+    <section class="pie_wrap">
+      <PieChart :pieData="pieData" v-if="showPie"></PieChart>
+    </section>
     <el-row :gutter="20">
       <el-col :span="7" :offset="0">
         选择筛选类型
@@ -12,28 +15,39 @@
           </el-option>
         </el-select>
       </el-col>
-      <el-col :span="5" v-if="selectedType !== 0">
+      <el-col :span="3">
         <el-input
+          v-show="selectedType !== 0"
           placeholder="起始值"
           v-model="submitData.start"
           type="number"
           clearable>
         </el-input>
       </el-col>
-      <el-col :span="5" v-if="selectedType !== 0">
+      <el-col :span="3">
         <el-input
+          v-show="selectedType !== 0"
           placeholder="结束值"
           v-model="submitData.end"
           type="number"
           clearable>
         </el-input>
       </el-col>
-      <el-col :span="2" :offset="0">
+      <el-col :span="1" :offset="0">
         <el-button type="primary" @click="queryList">
           查询
         </el-button>
       </el-col>
-      <el-col :span="2" :offset="3">
+      <el-col :span="3" :offset="2">
+        <el-input
+          v-show="selectedType !== 0"
+          type="number"
+          placeholder="划分范围"
+          v-model="span">
+          <i @click="handleSep" slot="suffix" class="el-input__icon el-icon-pie-chart sep_btn"></i>
+        </el-input>
+      </el-col>
+      <el-col :span="1" :offset="1">
         <el-button type="success" @click="add">
           新增
         </el-button>
@@ -119,12 +133,15 @@
 
 <script>
 import api from '@/api/axios'
+import PieChart from '@/components/PieChart.vue'
 export default {
   name: 'HomeView',
-  components: {
-  },
+  components: { PieChart },
   data() {
     return {
+      showPie: false,
+      span: null,
+      pieData: [],
       activeTab: '',
       sections: ['全部'],
       pageSize: 20,
@@ -171,15 +188,25 @@ export default {
     this.getList()
   },
   watch: {
-    selectedType(newVal) {
-      if(newVal == 0) {
-        this.submitData.start = null
-        this.submitData.end = null
-        this.sections = ['全部']
+    selectedType() {
+      this.submitData.start = null
+      this.submitData.end = null
+    },
+    span(newVal) {
+      if(newVal<1 || newVal.toString().indexOf('.')!=-1) {
+        this.$notify({
+          title: '',
+          message: '请输入大于1的整数',
+          type: 'warning'
+        })
+        this.span = 1
       }
     }
   },
   methods:{
+    handleSep(){
+      this.queryList(null, true)
+    },
     genderFormatter(row) {
       const { gender } = row
       return gender == 0 ? '女' : '男'
@@ -253,7 +280,11 @@ export default {
         this.$message.error(`错误：${res.data}`)
       }
     },
-    queryList(){
+    queryList(e, flag){
+      if(this.selectedType!=0 && (!this.submitData.start || !this.submitData.end)) {
+        this.$message.error(`请填写完整起始值、结束值`)
+        return
+      }
       const range = parseInt(this.submitData.end) - parseInt(this.submitData.start)
       if(range <= 0) {
         this.$message.error(`查询范围有误，结束值：${this.submitData.end}小于起始值：${this.submitData.start}`)
@@ -261,6 +292,7 @@ export default {
       }
       this.queryType = this.selectedType
       this.activeTab = '0'
+      let span
       switch(this.queryType){
         case 0:
           this.sections = ['全部']
@@ -269,33 +301,27 @@ export default {
           this.getList()
           break
         case 1:
-          this.sepBirth()
-          this.queryStart = this.submitData.start
-          this.queryEnd = this.submitData.start
-          this.getList()
+          span = flag ? parseInt(this.span) : 1
+          this.sepRange(span)
           break
         case 2:
-          this.sepRange(1000)
-          if(range >= 1000) {
-            this.queryStart = parseInt(this.submitData.start)
-            this.queryEnd = parseInt(this.submitData.start) + 1000
-          } else {
-            this.queryStart = parseInt(this.submitData.start)
-            this.queryEnd = parseInt(this.submitData.end)
-          }
-          this.getList()
+          span = flag ? parseInt(this.span) : 1000
+          this.sepRange(span)
           break
         case 3:
-          this.sepRange(50)
-          if(range >= 50) {
-            this.queryStart = parseInt(this.submitData.start)
-            this.queryEnd = parseInt(this.submitData.start) + 50
-          } else {
-            this.queryStart = parseInt(this.submitData.start)
-            this.queryEnd = parseInt(this.submitData.end)
-          }
-          this.getList()
+          span = flag ? parseInt(this.span) : 50
+          this.sepRange(span)
           break
+      }
+      if(this.queryType != 0) {
+        if(range >= span) {
+          this.queryStart = parseInt(this.submitData.start)
+          this.queryEnd = parseInt(this.submitData.start) + span
+        } else {
+          this.queryStart = parseInt(this.submitData.start)
+          this.queryEnd = parseInt(this.submitData.end)
+        }
+        this.getList()
       }
     },
     tabClick(e) {
@@ -305,23 +331,12 @@ export default {
       switch(this.queryType){
         case 0:
           break
-        case 1:
-          this.queryStart = val
-          this.queryEnd = val
-          this.getList()
-          break
         default:
           pos = val.indexOf('~')
           this.queryStart = parseInt(val.substring(0, pos))
           this.queryEnd = parseInt(val.substring(pos+1))
           this.getList()
           break
-      }
-    },
-    sepBirth() {
-      this.sections = []
-      for(let i = this.submitData.start; i <= this.submitData.end; i++) {
-        this.sections.push(i.toString())
       }
     },
     sepRange(span) {
@@ -341,6 +356,27 @@ export default {
         }
       }
     },
+    async getProportion(start, end) {
+      this.showPie = false
+      const params = {
+        type: this.queryType,
+        start,
+        end
+      }
+      let { data } = await api.getNums(params)
+      let typeObj = this.options.find(item => item.value == this.queryType)
+      const pieData = [
+        {
+          value: data[1] - data[0],
+          name: '【其它】'
+        },{
+          value: data[0],
+          name: `【${typeObj.label}${this.queryStart}~${this.queryEnd}】`
+        }
+      ]
+      this.pieData = pieData
+      this.showPie = true
+    },
     async getList() {
       const params = {
         type: this.queryType,
@@ -354,7 +390,19 @@ export default {
       totalRes = await api.selectTotal(params)
       this.tableData = listRes.data
       this.total = totalRes.data
+      if(this.queryStart) {
+        this.getProportion(this.queryStart, this.queryEnd)
+      }
     }
   }
 }
 </script>
+
+<style lang="less" scoped>
+.pie_wrap{
+  height: 220px;
+}
+.sep_btn {
+  cursor: pointer;
+}
+</style>

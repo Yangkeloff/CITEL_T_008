@@ -6,6 +6,7 @@ import com.example.cit08server.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -45,6 +46,26 @@ public class PersonController {
             typeStr = "hour";
         }
         return personService.selectTotal(typeStr, start, end);
+    }
+    @RequestMapping(value = "/nums", method = RequestMethod.GET)
+    public List<Integer> getNums(
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "start") int start,
+            @RequestParam(value = "end") int end){
+        String typeStr = "";
+        if (type == 1) {
+            typeStr = "birth";
+        }else if (type == 2) {
+            typeStr = "mileage";
+        }else if (type == 3) {
+            typeStr = "hour";
+        }
+        int typeTotal = personService.selectTotal(typeStr, start, end);
+        int allTotal = personService.allTotal();
+        List<Integer> res = new ArrayList<>();
+        res.add(typeTotal);
+        res.add(allTotal);
+        return res;
     }
 
     @RequestMapping(value = "/getPerson/{id}", method = RequestMethod.GET)

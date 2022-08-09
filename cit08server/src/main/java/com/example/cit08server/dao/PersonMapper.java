@@ -15,6 +15,8 @@ public interface PersonMapper {
 
     @Select("select * from person where id = #{id}")
     Person getPerson(@Param("id") int id);
+    @Select("select count(*) from person")
+    Integer allTotal();
     @Select({"<script>" +
             "select count(*) from person " +
             "<if test='type.length()>0'>" +

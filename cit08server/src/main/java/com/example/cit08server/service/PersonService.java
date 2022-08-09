@@ -29,6 +29,9 @@ public class PersonService {
     public List<Person> findAllPerson(String type, int start, int end, int from, int pageSize) {
         return personMapper.findAllPerson(type, start, end, from, pageSize);
     }
+    public Integer allTotal(){
+        return personMapper.allTotal();
+    }
     public Integer selectTotal(String type, int start, int end){
         return personMapper.selectTotal(type, start, end);
     }
