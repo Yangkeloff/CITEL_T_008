@@ -191,20 +191,19 @@ export default {
     selectedType() {
       this.submitData.start = null
       this.submitData.end = null
-    },
-    span(newVal) {
-      if(newVal<1 || newVal.toString().indexOf('.')!=-1) {
+      this.span = null
+    }
+  },
+  methods:{
+    handleSep(){
+      if(this.span<1 || this.span.toString().indexOf('.')!=-1) {
         this.$notify({
           title: '',
           message: '请输入大于1的整数',
           type: 'warning'
         })
-        this.span = 1
+        return
       }
-    }
-  },
-  methods:{
-    handleSep(){
       this.queryList(null, true)
     },
     genderFormatter(row) {

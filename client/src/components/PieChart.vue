@@ -10,28 +10,6 @@ export default {
   data() {
     return {
       myChart: {},
-      // pieData: [
-      //   {
-      //     value: 463,
-      //     name: "江苏"
-      //   },
-      //   {
-      //     value: 395,
-      //     name: "浙江"
-      //   },
-      //   {
-      //     value: 157,
-      //     name: "山东"
-      //   },
-      //   {
-      //     value: 149,
-      //     name: "广东"
-      //   },
-      //   {
-      //     value: 147,
-      //     name: "湖南"
-      //   }
-      // ],
       pieName: [],
       myChartStyle: { float: "left", width: "100%", height: "200px" }
     }
